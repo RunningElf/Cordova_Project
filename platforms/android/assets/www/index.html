@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+
+    <!-- Include the jQuery library -->
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+    <!-- Include the jQuery Mobile library -->
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+
+    <link rel="stylesheet" href="css/themes/themes.min.css" />
+    <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+
+    <script type="text/javascript">
+
+        var li;
+        var ic;
+        var myWriter;
+        var file;
+
+
+            function onBodyLoad()
+            {
+                document.addEventListener("deviceready", onDeviceReady(), false);
+            }
+
+
+            function onDeviceReady(){
+
+                alert("onDeviceReady");
+                 document.addEventListener("online", isOnline, false);
+                 document.addEventListener("offline", isOffline, false);
+
+                checkConnection();
+
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+
+        }
+
+    function checkConnection() {
+             var networkState = navigator.connection.type;
+                li=document.getElementById('connect');
+                var states = {};
+                states[Connection.UNKNOWN]  = 'Unknown connection';
+                states[Connection.ETHERNET] = 'Ethernet connection';
+                states[Connection.WIFI]     = 'WiFi connection';
+                states[Connection.CELL_2G]  = 'Cell 2G connection';
+                states[Connection.CELL_3G]  = 'Cell 3G connection';
+                states[Connection.CELL_4G]  = 'Cell 4G connection';
+                states[Connection.CELL]     = 'Cell generic connection';
+                states[Connection.NONE]     = 'No network connection';
+                li.innerHTML = '<h3>' + states[networkState]+'</h3>';
+                alert('Connection type: ' + states[networkState]);
+    }
+
+
+
+        function isOnline(){
+            checkConnection();
+        }
+
+        function isOffline(){
+            checkConnection();
+        }
+
+
+//****************************************Photos functions
+
+
+
+function takePhoto(){
+
+console.log("Entering takePhoto");
+navigator.camera.getPicture(cameraSuccess, cameraError);
+console.log("Leaving takePhoto");
+}
+
+function cameraSuccess(imageURL){
+
+ic = document.getElementById('photoGallery');
+ic.innerHTML+= '<img  style= "padding: 3px;" src ="' + imageURL + '" width="30%" /></div>';
+writeFile(imageURL);
+
+}
+
+
+
+function cameraError(errObj){
+console.log("Entering cameraError");
+console.error(JSON.stringify(errObj));
+navigator.notification.alert("Error: "+JSON.stringify(errObj), null, "Camera Error", btnText);
+
+
+}
+
+
+//******************************File functions
+function clearField(){
+    ic.innerHTML ='';
+    clearFile();
+}
+
+function clearFile(){
+     file.createWriter(function(writer){
+            writer.write("");
+            }, function(error){
+                alert(error.code);});
+}
+
+
+
+ function gotFS(fileSystem) {
+        fileSystem.root.getFile("readme.txt",{create: true, exclusive: false}, gotFileEntry, fail);
+    }
+
+    function gotFileEntry(fileEntry) {
+        fileEntry.file(gotFile, fail);
+        file = fileEntry;
+    }
+
+    function writeFile(imageURL){
+        var write = '<img  style= "padding: 3px;" src ="' + imageURL + '" width="30%"></div>';
+
+        file.createWriter(function(writer){
+            writer.seek(writer.length);
+            writer.write(write);
+            }, function(error){
+                alert(error.code);});
+    }
+
+    function gotFile(file){
+        readAsText(file);
+    }
+     function readAsText(file) {
+        var reader = new FileReader();
+        ic = document.getElementById('photoGallery');
+        reader.onloadend = function(evt) {
+            console.log(evt.target.result);
+           ic.innerHTML = evt.target.result;
+        };
+        reader.readAsText(file);
+    }
+
+    function fail(evt) {
+        alert(evt.target.error.code);
+    }
+
+
+
+
+        </script>
+    <title>Mid-Term Project</title>
+</head>
+
+<body onload="onBodyLoad()">
+
+<section id="mainPage" data-role="page" >
+
+    <div data-role="header" >
+        <h1>Mid Term Project</h1>
+
+    </div>
+
+    <div data-role="main" class="ui-content">
+        <p>This mid term project will utilize JQuery Mobile, the Camera API and the Battery Events API
+        </p>
+        <div>
+            <button onclick="takePhoto()">Add New Photo</button>
+        </div>
+
+        <div id="photoGallery" >
+
+
+        </div>
+
+        <div data-role="footer" data-position="fixed">
+            <div id ="connect" style="text-align:center;"><h3>Disconnected</h3></div>
+            <a onclick="clearField();" class="ui-btn-right">Clear</a>
+        </div>
+
+    </div>
+</section>
+
+
+
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+</body>
+</html>
+
+
+</html>
+
+
+
+
+
+
+
